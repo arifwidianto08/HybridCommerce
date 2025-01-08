@@ -1,0 +1,184 @@
+
+Table customers {
+    id int [pk, increment]
+    name varchar [not null]
+    phone varchar [not null]
+    email varchar [not null]
+    address varchar [not null]
+    registration_date datetime
+    created_at datetime
+    updated_at datetime
+}
+
+Table customer_addresses {
+    id int [pk, increment]
+    customer_id int [ref: > customers.id, not null]
+    line_1 varchar [not null]
+    line_2 varchar
+    city varchar [not null]
+    state varchar [not null]
+    postal_code varchar [not null]
+    country varchar [not null]
+    created_at datetime
+    updated_at datetime
+}
+
+Table employees {
+    id int [pk, increment]
+    name varchar [not null]
+    position enum('manager', 'cashier') [not null]
+    hire_date datetime
+    salary decimal [not null]
+    phone varchar [not null]
+    email varchar [not null]
+    created_at datetime
+    updated_at datetime
+}
+
+Table warehouses {
+    id int [pk, increment]
+    name varchar [not null]
+    location varchar [not null]
+    created_at datetime
+    updated_at datetime
+}
+
+Table shelves {
+    id int [pk, increment]
+    number int [not null]
+    location varchar
+    created_at datetime
+    updated_at datetime
+}
+
+Table products {
+    id int [pk, increment]
+    name varchar [not null]
+    price decimal [not null]
+    barcode varchar [not null, unique]
+    available_in_store int  // New column for tracking shelf stock
+    available_in_warehouse int  // New column for tracking warehouse stock
+    created_at datetime
+    updated_at datetime
+}
+
+Table product_categories {
+    id int [pk, increment, not null]
+    name varchar
+    created_at datetime
+    updated_at datetime
+}
+
+Table product_category_maps {
+    id int [pk, increment, not null]    
+    product_id int [ref: > products.id, not null]
+    category_id int [ref: > product_categories.id, not null]
+    created_at datetime
+    updated_at datetime
+}
+
+Table inventory_movements {
+    id int [pk, increment]
+    product_id int [ref: > products.id, not null]
+    warehouse_id int [ref: > warehouses.id] // optional,  since the product movement can happened on both warehouse or shelves
+    shelf_id int [ref: > warehouses.id] // optional, since the product movement can happened on both warehouse or shelves, but one of them must be filled
+    movement_date datetime
+    movement_type enum('in', 'out')
+    quantity int
+    movement_source varchar // Indicates if it's from shelf or warehouse
+    reason varchar
+    created_at datetime
+    updated_at datetime
+}
+
+Table product_shelf_stocks {
+    id int [pk, increment]
+    shelf_id int [ref: > shelves.id, not null]
+    product_id int [ref: > products.id, not null]
+    stock int
+    created_at datetime
+    updated_at datetime
+}
+
+
+Table product_warehouse_stocks {
+    id int [pk, increment]
+    warehouse_id int [ref: > warehouses.id, not null]
+    product_id int [ref: > products.id, not null]
+    stock int
+    created_at datetime
+    updated_at datetime
+}
+
+
+Table orders {
+    id int [pk, increment]
+    type enum('online', 'offline')
+    customer_id int [ref: > customers.id, not null]
+    employee_id int [ref: > employees.id] 
+    total_amount decimal
+    created_at datetime
+    updated_at datetime
+}
+
+Table order_line_items {
+    id int [pk, increment]
+    transaction_id int [ref: > orders.id]
+    product_id int [ref: > products.id]
+    quantity int
+    unit_price decimal
+    subtotal decimal
+    created_at datetime
+    updated_at datetime
+}
+
+Table shipping_methods {
+    id int [pk, increment]
+    name varchar
+    created_at datetime
+    updated_at datetime
+}
+
+Table order_shippings {
+    id int [pk, increment]
+    transaction_id int [ref: > orders.id]
+    shipping_method_id int [ref: > shipping_methods.id]
+    shipping_date datetime
+    estimation_arrival datetime
+    tracking_number varchar
+    line_1 varchar [not null]
+    line_2 varchar
+    city varchar [not null]
+    state varchar [not null]
+    postal_code varchar [not null]
+    country varchar [not null]
+    created_at datetime
+    updated_at datetime
+}
+
+Table order_fulfillments {
+    id int [pk, increment]
+    transaction_id int [ref: > orders.id]
+    fulfillment_status enum('fulfilled', 'partially_fulfilled', 'unfulfilled')
+    fulfillment_date datetime
+    created_at datetime
+    updated_at datetime
+}
+
+Table payment_methods {
+    id int [pk, increment]
+    name varchar // COD, Bank Transfer, Cash, QRIS, Debit
+    created_at datetime
+    updated_at datetime
+}
+
+Table order_payments {
+    id int [pk, increment]
+    transaction_id int [ref: > orders.id]
+    payment_method_id int [ref: > payment_methods.id]
+    amount decimal
+    status enum('paid', 'unpaid', 'partially_paid')
+    paid_at datetime
+    created_at datetime
+    updated_at datetime
+}
