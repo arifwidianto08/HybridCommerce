@@ -153,14 +153,14 @@ CREATE TABLE orders (
 
 CREATE TABLE order_line_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_id INT,
+    order_id INT,
     product_id INT,
     quantity INT,
     unit_price DECIMAL(10,2),
     subtotal DECIMAL(10,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_id) REFERENCES orders(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
@@ -173,7 +173,7 @@ CREATE TABLE shipping_methods (
 
 CREATE TABLE order_shippings (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_id INT,
+    order_id INT,
     shipping_method_id INT,
     shipping_date DATETIME,
     estimation_arrival DATETIME,
@@ -186,18 +186,18 @@ CREATE TABLE order_shippings (
     country VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_id) REFERENCES orders(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (shipping_method_id) REFERENCES shipping_methods(id)
 );
 
 CREATE TABLE order_fulfillments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_id INT,
+    order_id INT,
     fulfillment_status ENUM('fulfilled', 'partially_fulfilled', 'unfulfilled'),
     fulfillment_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_id) REFERENCES orders(id)
+    FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
 CREATE TABLE payment_methods (
@@ -209,14 +209,14 @@ CREATE TABLE payment_methods (
 
 CREATE TABLE order_payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_id INT,
+    order_id INT,
     payment_method_id INT,
     amount DECIMAL(10,2),
     status ENUM('paid', 'unpaid', 'partially_paid'),
     paid_at DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_id) REFERENCES orders(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
 );
 
@@ -476,7 +476,7 @@ INSERT INTO orders (type, customer_id, employee_id, total_amount) VALUES
 ('offline', 20, 10, 2599.80);
 
 -- Order Line Items
-INSERT INTO order_line_items (transaction_id, product_id, quantity, unit_price, subtotal) VALUES
+INSERT INTO order_line_items (order_id, product_id, quantity, unit_price, subtotal) VALUES
 (1, 1, 1, 999.99, 999.99),
 (1, 5, 1, 29.99, 29.99),
 (2, 2, 1, 699.99, 699.99),
@@ -499,7 +499,7 @@ INSERT INTO order_line_items (transaction_id, product_id, quantity, unit_price, 
 (19, 20, 1, 199.99, 199.99);
 
 -- Order Fulfillments
-INSERT INTO order_fulfillments (transaction_id, fulfillment_status, fulfillment_date) VALUES
+INSERT INTO order_fulfillments (order_id, fulfillment_status, fulfillment_date) VALUES
 (1, 'fulfilled', '2024-01-01 14:30:00'),
 (2, 'fulfilled', '2024-01-02 15:30:00'),
 (3, 'fulfilled', '2024-01-03 16:30:00'),
@@ -522,7 +522,7 @@ INSERT INTO order_fulfillments (transaction_id, fulfillment_status, fulfillment_
 (20, 'unfulfilled', NULL);
 
 -- Order Payments
-INSERT INTO order_payments (transaction_id, payment_method_id, amount, status, paid_at) VALUES
+INSERT INTO order_payments (order_id, payment_method_id, amount, status, paid_at) VALUES
 (1, 1, 1299.98, 'paid', '2024-01-01 14:00:00'),
 (2, 4, 799.98, 'paid', '2024-01-02 15:00:00'),
 (3, 2, 599.97, 'paid', '2024-01-03 16:00:00'),
@@ -545,7 +545,7 @@ INSERT INTO order_payments (transaction_id, payment_method_id, amount, status, p
 (20, 4, 2599.80, 'unpaid', NULL);
 
 -- Order Shippings
-INSERT INTO order_shippings (transaction_id, shipping_method_id, shipping_date, estimation_arrival, tracking_number, line_1, line_2, city, state, postal_code, country) VALUES
+INSERT INTO order_shippings (order_id, shipping_method_id, shipping_date, estimation_arrival, tracking_number, line_1, line_2, city, state, postal_code, country) VALUES
 (1, 1, '2024-01-01', '2024-01-05', 'TRK001', '123 Ship St', 'Apt 1', 'New York', 'NY', '10001', 'USA'),
 (2, 2, '2024-01-02', '2024-01-04', 'TRK002', '456 Delivery Ave', NULL, 'Los Angeles', 'CA', '90001', 'USA'),
 (3, 3, '2024-01-03', '2024-01-04', 'TRK003', '789 Post Rd', 'Suite 3', 'Chicago', 'IL', '60601', 'USA'),
@@ -605,3 +605,67 @@ INSERT INTO inventory_movements (product_id, warehouse_id, shelf_id, movement_da
 (8, NULL, 2, '2024-01-05', 'out', 3, 'sales', 'Customer purchase'),
 (9, NULL, 3, '2024-01-06', 'out', 2, 'sales', 'Customer purchase'),
 (10, NULL, 3, '2024-01-06', 'out', 6, 'sales', 'Customer purchase');
+
+
+
+INSERT INTO orders (id, type, customer_id, employee_id, total_amount) VALUES
+(21,'online', 1, 1, 1299.98),
+(22,'offline', 2, 6, 799.98),
+(23,'online', 3, 2, 599.97),
+(24,'offline', 4, 7, 449.96),
+(25,'online', 5, 3, 899.95),
+(26,'offline', 6, 8, 299.94),
+(27,'online', 7, 4, 699.93),
+(28,'offline', 8, 9, 199.92),
+(29,'online', 9, 5, 399.91),
+(30,'offline', 10, 10, 599.90);
+
+
+INSERT INTO order_line_items (order_id, product_id, quantity, unit_price, subtotal) VALUES
+(21, 1, 1, 999.99, 999.99),
+(22, 5, 1, 29.99, 29.99),
+(23, 2, 1, 699.99, 699.99),
+(24, 3, 1, 399.99, 399.99),
+(25, 4, 1, 99.99, 99.99),
+(26, 6, 1, 59.99, 59.99),
+(27, 7, 1, 299.99, 299.99),
+(28, 8, 1, 199.99, 199.99),
+(29, 9, 1, 149.99, 149.99),
+(30, 10, 1, 79.99, 79.99);
+
+INSERT INTO order_fulfillments (order_id, fulfillment_status, fulfillment_date) VALUES
+(21, 'fulfilled', '2024-01-01 14:30:00'),
+(22, 'fulfilled', '2024-01-02 15:30:00'),
+(23, 'fulfilled', '2024-01-03 16:30:00'),
+(24, 'fulfilled', '2024-01-04 17:30:00'),
+(25, 'partially_fulfilled', '2024-01-05 18:30:00'),
+(26, 'partially_fulfilled', '2024-01-06 19:30:00'),
+(27, 'partially_fulfilled', '2024-01-07 20:30:00'),
+(28, 'unfulfilled', NULL),
+(29, 'unfulfilled', NULL),
+(30, 'unfulfilled', NULL);
+
+INSERT INTO order_payments (order_id, payment_method_id, amount, status, paid_at) VALUES
+(21, 1, 1299.98, 'paid', '2024-01-01 14:00:00'),
+(22, 4, 799.98, 'paid', '2024-01-02 15:00:00'),
+(23, 2, 599.97, 'paid', '2024-01-03 16:00:00'),
+(24, 4, 449.96, 'paid', '2024-01-04 17:00:00'),
+(25, 3, 899.95, 'partially_paid', '2024-01-05 18:00:00'),
+(26, 4, 299.94, 'partially_paid', '2024-01-06 19:00:00'),
+(27, 1, 699.93, 'partially_paid', '2024-01-07 20:00:00'),
+(28, 4, 199.92, 'unpaid', NULL),
+(29, 2, 399.91, 'unpaid', NULL),
+(30, 4, 599.90, 'unpaid', NULL);
+
+-- Order Shippings
+INSERT INTO order_shippings (order_id, shipping_method_id, shipping_date, estimation_arrival, tracking_number, line_1, line_2, city, state, postal_code, country) VALUES
+(21, 1, '2024-01-01', '2024-01-05', 'TRK001', '123 Ship St', 'Apt 1', 'New York', 'NY', '10001', 'USA'),
+(22, 2, '2024-01-02', '2024-01-04', 'TRK002', '456 Delivery Ave', NULL, 'Los Angeles', 'CA', '90001', 'USA'),
+(23, 3, '2024-01-03', '2024-01-04', 'TRK003', '789 Post Rd', 'Suite 3', 'Chicago', 'IL', '60601', 'USA'),
+(24, 1, '2024-01-04', '2024-01-08', 'TRK004', '321 Mail St', NULL, 'Houston', 'TX', '77001', 'USA'),
+(25, 2, '2024-01-05', '2024-01-07', 'TRK005', '654 Courier Dr', 'Unit 5', 'Phoenix', 'AZ', '85001', 'USA'),
+(26, 3, '2024-01-06', '2024-01-07', 'TRK006', '987 Express Ln', NULL, 'Philadelphia', 'PA', '19101', 'USA'),
+(27, 1, '2024-01-07', '2024-01-11', 'TRK007', '147 Package Rd', 'Apt 7', 'San Antonio', 'TX', '78201', 'USA'),
+(28, 2, '2024-01-08', '2024-01-10', 'TRK008', '258 Postal Ave', NULL, 'San Diego', 'CA', '92101', 'USA'),
+(29, 3, '2024-01-09', '2024-01-10', 'TRK009', '369 Delivery St', 'Suite 9', 'Dallas', 'TX', '75201', 'USA'),
+(30, 1, '2024-01-10', '2024-01-14', 'TRK010', '741 Shipping Rd', NULL, 'San Jose', 'CA', '95101', 'USA');
